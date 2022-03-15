@@ -91,6 +91,7 @@ async function main() {
     const shpFiles = await glob('**/*.shp', {cwd: temporaryDir, nocase: true})
     const shpFile = shpFiles[0]
     const features = extractFeatures(join(temporaryDir, shpFile))
+    console.log(`traitement du fichier : ${shpFile}`);
     features.forEach(feature => {
       irisOutput.write(truncate(feature, {precision: 5, mutate: true}))
     })
