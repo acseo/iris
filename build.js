@@ -82,7 +82,8 @@ async function main() {
   const archiveFiles = await readdir(dataDir)
 
   await bluebird.each(archiveFiles, async archiveFile => {
-    if (!archiveFile.includes('_D0') && !archiveFile.includes('_D9')) {
+    //if (!archiveFile.includes('_D0') && !archiveFile.includes('_D9')) {
+    if (!archiveFile.includes('IRIS-GE')) {
       return
     }
 
