@@ -51,7 +51,7 @@ app.get('/iris', (req, res) => {
   })
 
   if (exactResult) {
-    return res.send(exactResult.properties)
+    return res.send(exactResult)
   }
 
   const fuzzyResult = chain(candidates)
@@ -73,7 +73,7 @@ app.get('/iris', (req, res) => {
     .value()
 
   if (fuzzyResult) {
-    return res.send(fuzzyResult.properties)
+    return res.send(fuzzyResult)
   }
 
   res.sendStatus(404)
