@@ -23,6 +23,23 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'))
 }
 
+app.get('/iris-by-code', (req, res) => {
+
+  if (!req.query.codeIris) {
+    return res.sendStatus(400)
+  }
+
+  const candidates = features
+    .filter(el => (el.properties.codeIris === req.query.codeIris) )
+
+  if (candidates.length === 0) {
+    return res.sendStatus(404)
+  }
+
+  return res.send(candidates)
+  
+  })
+
 app.get('/iris', (req, res) => {
   if (!req.query.lat || !req.query.lon || !req.query.codeCommune) {
     return res.sendStatus(400)
