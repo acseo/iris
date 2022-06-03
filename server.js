@@ -23,6 +23,47 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'))
 }
 
+app.get('/cadastre', (req, res) => {
+
+  if (!req.query.dep || !req.query.id) {
+    return res.sendStatus(400)
+  }
+
+  let {features} = require(`./dist/cadastre-${req.query.dep}.json`)
+
+  const candidates = features
+    .filter(el => (el.properties.id === req.query.id) )
+    
+  if (candidates.length === 0) {
+    return res.sendStatus(404)
+  }
+
+  features = null
+
+  return res.send(candidates)
+  
+})
+
+app.get('/cadastre-by-iris', (req, res) => {
+
+  if (!req.query.dep || !req.query.codeIris) {
+    return res.sendStatus(400)
+  }
+
+  let {features} = require(`./dist/cadastre-${req.query.dep}.json`)
+
+  const candidates = features
+    .filter(el => ( el.properties.codeIris === req.query.codeIris) )
+
+  if (candidates.length === 0) {
+    return res.sendStatus(404)
+  }
+
+  features = null
+
+  return res.send(candidates)
+})
+
 app.get('/iris-by-code', (req, res) => {
 
   if (!req.query.codeIris) {

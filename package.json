@@ -7,13 +7,22 @@
   "private": false,
   "scripts": {
     "start": "node --max-old-space-size=4096 server",
-    "build": "node build"
+    "build-iris": "node build-iris",
+    "build-cadastre": "node --max-old-space-size=4096 build-cadastre",
+    "build-sitadel": "node --max-old-space-size=4096 build-sitadel"
   },
   "dependencies": {
     "@turf/turf": "^5.1.6",
+    "big-json": "^3.1.0",
+    "cli-progress": "^3.11.0",
     "cors": "^2.8.5",
+    "csv-parser": "^3.0.0",
     "express": "^4.17.1",
     "flatbush": "^3.3.0",
+    "json-2-csv": "^3.17.1",
+    "json2csv": "^5.0.7",
+    "jsonexport": "^3.2.0",
+    "jsonfile": "^6.1.0",
     "lodash": "^4.17.15",
     "morgan": "^1.10.0"
   },

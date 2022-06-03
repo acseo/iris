@@ -1,7 +1,12 @@
-/data
 /dist
 /tmp
 /node_modules
 .DS_Store
 .env
 *.log
+*.json
+*.csv
+*.pdf
+*.txt
+*.zip
+*.7z

@@ -15,7 +15,7 @@ const finished = promisify(require('stream').finished)
 
 const wgs84 = gdal.SpatialReference.fromProj4('+init=epsg:4326')
 
-const dataDir = join(__dirname, 'data')
+const dataDir = join(__dirname, 'data-iris')
 const distDir = join(__dirname, 'dist')
 const tmpDir = join(__dirname, 'tmp')
 
