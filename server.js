@@ -1,17 +1,20 @@
 #!/usr/bin/env node --max-old-space-size=4096
-const {features} = require('./dist/iris.json')
+//const {features} = require('./dist/iris.json')
+
+
 const express = require('express')
 const {chain, min} = require('lodash')
 const Flatbush = require('flatbush')
 const {bbox: getBbox, booleanPointInPolygon, point, lineString, pointToLineDistance} = require('@turf/turf')
 const morgan = require('morgan')
 const cors = require('cors')
+const { getSystemErrorMap } = require('util')
 
 const app = express()
 
-const geoIndex = new Flatbush(features.length)
-features.forEach(f => geoIndex.add(...getBbox(f)))
-geoIndex.finish()
+// const geoIndex = new Flatbush(features.length)
+// features.forEach(f => geoIndex.add(...getBbox(f)))
+// geoIndex.finish()
 
 if (process.env.NODE_ENV === 'production') {
   app.enable('trust proxy')
@@ -23,16 +26,18 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'))
 }
 
+
 app.get('/cadastre', (req, res) => {
 
   if (!req.query.dep || !req.query.id) {
     return res.sendStatus(400)
   }
 
-  let {features} = require(`./dist/cadastre-${req.query.dep}.json`)
-
-  const candidates = features
-    .filter(el => (el.properties.id === req.query.id) )
+  //let {features} = require(`./dist/cadastre-${req.query.dep}.json`)
+  let onlyOneResult = true;
+  let candidates = grepWithShell(`./dist/cadastre-${req.query.dep}.json`, "\"id\":\"".concat(req.query.id).concat("\""), onlyOneResult)
+  // const candidates = features
+  //   .filter(el => (el.properties.id === req.query.id) )
     
   if (candidates.length === 0) {
     return res.sendStatus(404)
@@ -70,8 +75,11 @@ app.get('/iris-by-code', (req, res) => {
     return res.sendStatus(400)
   }
 
+  let candidates = grepWithShell(`./dist/iris.json`, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
+  /*
   const candidates = features
     .filter(el => (el.properties.codeIris === req.query.codeIris) )
+  */
 
   if (candidates.length === 0) {
     return res.sendStatus(404)
@@ -92,6 +100,12 @@ app.get('/iris', (req, res) => {
   if (lat > 90 || lat < -90 || lon > 180 || lon < -180) {
     return res.sendStatus(400)
   }
+
+  let features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""))
+  
+  const geoIndex = new Flatbush(features.length)
+  features.forEach(f => geoIndex.add(...getBbox(f)))
+  geoIndex.finish()
 
   const candidates = geoIndex.neighbors(lon, lat, 10, 10, undefined)
     .filter(i => features[i].properties.codeCommune === req.query.codeCommune)
@@ -142,3 +156,34 @@ const port = process.env.PORT || 5000
 app.listen(port, () => {
   console.log(`Start listening on port ${port}`)
 })
+
+
+function grepWithShell (file, search, onlyOneResult) {
+  const { spawnSync} = require('child_process');
+  
+  if (onlyOneResult == undefined || onlyOneResult == false) {
+    //console.log([ 'ack ', "'"+search+"'", file].join(' '))
+    child = spawnSync('ack', [search, file])
+  } else {
+    //console.log([ 'ack ' , '-1' + nbResult, search, file].join(' '))
+    child = spawnSync('ack', [search, file])
+  }
+
+  if(child.stdout && child.stdout.toString().length > 0) {
+    
+    if (onlyOneResult == undefined || onlyOneResult == false) {
+      lines = child.stdout.toString().split(/\r\n|\r|\n/)
+      result = new Array();
+      for(line of lines) {      
+        if (line.trim().length > 0 ) {
+            result.push(JSON.parse(line));
+        }
+      }
+    } else {
+      result = JSON.parse(child.stdout.toString())
+    }
+    return result;
+  }
+
+  return new Array();
+};
