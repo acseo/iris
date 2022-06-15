@@ -82,9 +82,12 @@ app.get('/iris-by-code', (req, res) => {
     let onlyOneResult = false;
     features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
     fs.writeFileSync(jsonCityFile, JSON.stringify(features));  
+  } else {
+    features = JSON.parse(fs.readFileSync(jsonCityFile, 'utf8'));
   }
-
-  candidates = grepWithShell(jsonCityFile, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""));
+  console.log(features);
+  const candidates = features
+    .filter(el => ( el.properties.codeIris === req.query.codeIris) )
 
   if (candidates.length === 0) {
     return res.sendStatus(404)
