@@ -9,6 +9,8 @@ const {bbox: getBbox, booleanPointInPolygon, point, lineString, pointToLineDista
 const morgan = require('morgan')
 const cors = require('cors')
 const { getSystemErrorMap } = require('util')
+const fs = require('fs');
+const path = require('path')
 
 const app = express()
 
@@ -122,8 +124,15 @@ app.get('/iris', (req, res) => {
     return res.sendStatus(400)
   }
 
-  let features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""))
-  
+  let jsonCityFile = path.resolve(`./dist/`, 'iris-'+req.query.codeCommune+'.json');
+
+  if (!fs.existsSync(jsonCityFile)) {
+    features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""))
+    fs.writeFileSync(jsonCityFile, JSON.stringify(features));  
+  } else {
+    features = JSON.parse(fs.readFileSync(jsonCityFile, 'utf8'));
+  }
+    
   const geoIndex = new Flatbush(features.length)
   features.forEach(f => geoIndex.add(...getBbox(f)))
   geoIndex.finish()
