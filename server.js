@@ -85,7 +85,6 @@ app.get('/iris-by-code', (req, res) => {
   } else {
     features = JSON.parse(fs.readFileSync(jsonCityFile, 'utf8'));
   }
-  console.log(features);
   const candidates = features
     .filter(el => ( el.properties.codeIris === req.query.codeIris) )
 
