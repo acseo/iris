@@ -73,15 +73,16 @@ app.get('/cadastre-by-iris', (req, res) => {
 
 app.get('/iris-by-code', (req, res) => {
 
-  if (!req.query.codeIris) {
+  if (!req.query.codeIris || !req.query.codeCommune) {
     return res.sendStatus(400)
   }
 
-  let candidates = grepWithShell(`./dist/iris.json`, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
-  /*
-  const candidates = features
-    .filter(el => (el.properties.codeIris === req.query.codeIris) )
-  */
+  let jsonCityFile = path.resolve(`./dist/`, 'iris-'+req.query.codeCommune+'.json');
+  if (fs.existsSync(jsonCityFile)) {
+    candidates = grepWithShell(jsonCityFile, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
+  } else {
+    candidates = grepWithShell(`./dist/iris.json`, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
+  }
 
   if (candidates.length === 0) {
     return res.sendStatus(404)
@@ -97,12 +98,15 @@ app.get('/iris-by-commune', (req, res) => {
       return res.sendStatus(400)
     }
   
-    let onlyOneResult = false;
-    let candidates = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
-    /*
-    const candidates = features
-      .filter(el => (el.properties.codeIris === req.query.codeIris) )
-    */
+    let jsonCityFile = path.resolve(`./dist/`, 'iris-'+req.query.codeCommune+'.json');
+
+    if (!fs.existsSync(jsonCityFile)) {
+      let onlyOneResult = false;
+      candidates = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
+      fs.writeFileSync(jsonCityFile, JSON.stringify(features));  
+    } else {
+      candidates = JSON.parse(fs.readFileSync(jsonCityFile, 'utf8'));
+    }
   
     if (candidates.length === 0) {
       return res.sendStatus(404)
