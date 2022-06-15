@@ -89,6 +89,27 @@ app.get('/iris-by-code', (req, res) => {
   
   })
 
+app.get('/iris-by-commune', (req, res) => {
+
+    if (!req.query.codeCommune) {
+      return res.sendStatus(400)
+    }
+  
+    let onlyOneResult = false;
+    let candidates = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
+    /*
+    const candidates = features
+      .filter(el => (el.properties.codeIris === req.query.codeIris) )
+    */
+  
+    if (candidates.length === 0) {
+      return res.sendStatus(404)
+    }
+  
+    return res.send(candidates)
+    
+    })  
+
 app.get('/iris', (req, res) => {
   if (!req.query.lat || !req.query.lon || !req.query.codeCommune) {
     return res.sendStatus(400)
