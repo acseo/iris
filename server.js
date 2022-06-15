@@ -78,11 +78,13 @@ app.get('/iris-by-code', (req, res) => {
   }
 
   let jsonCityFile = path.resolve(`./dist/`, 'iris-'+req.query.codeCommune+'.json');
-  if (fs.existsSync(jsonCityFile)) {
-    candidates = grepWithShell(jsonCityFile, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
-  } else {
-    candidates = grepWithShell(`./dist/iris.json`, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
+  if (!fs.existsSync(jsonCityFile)) {    
+    let onlyOneResult = false;
+    features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
+    fs.writeFileSync(jsonCityFile, JSON.stringify(features));  
   }
+
+  candidates = grepWithShell(jsonCityFile, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""));
 
   if (candidates.length === 0) {
     return res.sendStatus(404)
