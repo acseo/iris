@@ -73,18 +73,27 @@ app.get('/cadastre-by-iris', (req, res) => {
 
 app.get('/iris-by-code', (req, res) => {
 
-  if (!req.query.codeIris || !req.query.codeCommune) {
+  if (!req.query.codeIris) {
     return res.sendStatus(400)
   }
 
-  let jsonCityFile = path.resolve(`./dist/`, 'iris-'+req.query.codeCommune+'.json');
-  if (!fs.existsSync(jsonCityFile)) {    
-    let onlyOneResult = false;
-    features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
-    fs.writeFileSync(jsonCityFile, JSON.stringify(features));  
-  } else {
-    features = JSON.parse(fs.readFileSync(jsonCityFile, 'utf8'));
+  if (req.query.codeCommune == '75056' || req.query.codeCommune == '13055' || req.query.codeCommune == '69123') {
+    req.query.codeCommune = false;
   }
+  
+  if (req.query.codeCommune) {
+    let jsonCityFile = path.resolve(`./dist/`, 'iris-'+req.query.codeCommune+'.json');
+    if (!fs.existsSync(jsonCityFile)) {    
+      let onlyOneResult = false;
+      features = grepWithShell(`./dist/iris.json`, "\"codeCommune\":\"".concat(req.query.codeCommune).concat("\""), onlyOneResult)
+      fs.writeFileSync(jsonCityFile, JSON.stringify(features));  
+      } else {
+        features = JSON.parse(fs.readFileSync(jsonCityFile, 'utf8'));
+      }
+  } else {
+    features = grepWithShell(`./dist/iris.json`, "\"codeIris\":\"".concat(req.query.codeIris).concat("\""))
+  }
+
   const candidates = features
     .filter(el => ( el.properties.codeIris === req.query.codeIris) )
 
@@ -203,7 +212,7 @@ function grepWithShell (file, search, onlyOneResult) {
     //console.log([ 'ack ', "'"+search+"'", file].join(' '))
     child = spawnSync('ack', [search, file])
   } else {
-    //console.log([ 'ack ' , '-1' + nbResult, search, file].join(' '))
+    //console.log([ 'ack ' , '-1' , search, file].join(' '))
     child = spawnSync('ack', [search, file])
   }
 
