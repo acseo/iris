@@ -218,7 +218,7 @@ app.get('/irises', (req, res) => {
   features.forEach(f => geoIndex.add(...getBbox(f)))
   geoIndex.finish()
    
-  let result = new Array();
+  let results = new Array();
   for (coordinate of coordinates) {
     let lat = Number.parseFloat(coordinate.lat);
     let lon = Number.parseFloat(coordinate.lon);
@@ -242,9 +242,14 @@ app.get('/irises', (req, res) => {
     })
   
     if (exactResult) {
-      exactResult.lat = lat;
-      exactResult.lon = lon;
-      result.push(exactResult);
+
+      let result = {
+        'lat' : lat,
+        'lon' : lon,
+        'properties' : exactResult.properties
+      };
+      
+      results.push(result);
       continue;
     }
 
@@ -267,16 +272,20 @@ app.get('/irises', (req, res) => {
       .value()
 
     if (fuzzyResult) {
-      fuzzyResult.lat = lat;
-      fuzzyResult.lon = lon;
-      result.push(fuzzyResult);
+      let result = {
+        'lat' : lat,
+        'lon' : lon,
+        'properties' : fuzzyResult.properties
+      };
+      
+      results.push(result);      
     }
   }
 
-  res.send(result);
+  res.send(results);
 })
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5001
 
 app.listen(port, () => {
   console.log(`Start listening on port ${port}`)
