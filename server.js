@@ -242,6 +242,8 @@ app.get('/irises', (req, res) => {
     })
   
     if (exactResult) {
+      exactResult.lat = lat;
+      exactResult.lon = lon;
       result.push(exactResult);
       continue;
     }
@@ -265,6 +267,8 @@ app.get('/irises', (req, res) => {
       .value()
 
     if (fuzzyResult) {
+      fuzzyResult.lat = lat;
+      fuzzyResult.lon = lon;
       result.push(fuzzyResult);
     }
   }
